@@ -1,11 +1,13 @@
 import { View, Text, Dimensions } from 'react-native'
 import React from 'react'
 import { FAB } from 'react-native-paper'
+import { SesionContext } from '../providers/SesionProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function FloatinMenu({ navigation }) {
 
     const [expandedMenu, setExpandedMenu] = React.useState(false);
-
+    const { setSesion, sesion } = React.useContext(SesionContext)
     const handlePressMenu = () => setExpandedMenu(!expandedMenu);
 
  
