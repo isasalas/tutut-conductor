@@ -41,11 +41,9 @@ export default function ViajesScreen({ navigation }) {
                 onPress={() => {
                     actualizarViajes()
                 }} 
-                title={'No tienes Viajes por hoy'}
-                description={'Intenta m[as tarde'}
-
-                left={props => <List.Icon {...props} icon="briefcase-off" />}
-
+                title={'Aun no tienes viajes'}
+                description={'Preciona para refrescar'} 
+                left={props => <List.Icon {...props} icon="briefcase-off" />} 
                 right={props => <List.Icon {...props} icon="refresh" />}
             />
         </SafeAreaView>
@@ -69,9 +67,13 @@ export default function ViajesScreen({ navigation }) {
 
                     right={props => <List.Icon {...props} icon="arrow-right" />}
                 />
-            ))
-
-            }
+            ))}
+            <List.Item
+                onPress={() => {
+                    actualizarViajes()
+                }}  
+                description={'Preciona para refrescar'} 
+            />
 
         </SafeAreaView>
     )

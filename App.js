@@ -6,7 +6,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ViajesScreen from './screens/ViajesScreen';
 import { ViajeProvider } from './providers/ViajeProvider';
-import { DefaultTheme, List, MD2DarkTheme, MD3DarkTheme } from 'react-native-paper';
+import { Button, DefaultTheme, List, MD2DarkTheme, MD3DarkTheme } from 'react-native-paper';
 import { Provider as PaperProvider } from 'react-native-paper';
 import MapScreen from './screens/MapScreen';
 
