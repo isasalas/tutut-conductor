@@ -1,7 +1,7 @@
 
-//export  const urlApi='http://localhost:3000/api';
-export  const urlSocket='http://44.210.111.253:3001';
-export  const urlApi='http://44.210.111.253:3000/api';
+export  const urlBackend='http://192.168.0.7';
+export  const urlSocket=`${urlBackend}:3001`;
+export  const urlApi=`${urlBackend}:3000/api`;
 export  const urlUser='/user';
 export  const urlLinea='/linea';
 export  const urlRole='/role';

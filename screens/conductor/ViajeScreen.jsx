@@ -1,11 +1,11 @@
 import * as React from 'react';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
-import { LineaModelJson } from '../utils/models';
+import { LineaModelJson } from '../../utils/models';
 import axios from 'axios'
-import { urlApi, urlGps, urlLinea } from '../utils/apiData';
-import { SesionContext } from '../providers/SesionProvider';
-import { ViajeContext } from '../providers/ViajeProvider';
+import { urlApi, urlGps, urlLinea, urlViaje } from '../../utils/apiData';
+import { SesionContext } from '../../providers/SesionProvider';
+import { ViajeContext } from '../../providers/ViajeProvider';
 
 import * as Location from 'expo-location';
 import { Appbar, Banner, Dialog, FAB, List, MD3Colors, Portal, Switch } from 'react-native-paper';
@@ -13,12 +13,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PropTypes from 'prop-types';
-import { mapStyleDark } from '../utils/MapStyle';
-import socket from '../components/Socket.io';
-import FloatinMenu from '../components/FloatingMenu';
+import { mapStyleDark } from '../../utils/MapStyle';
+import socket from '../../components/Socket.io';
+import FloatinMenu from '../../components/FloatingMenu';
 
 
-export default function MapScreen({ navigation }) {
+export default function ViajeScreen({ navigation }) {
   const { sesion } = React.useContext(SesionContext)
   const { viaje, setViaje } = React.useContext(ViajeContext)
 
@@ -45,39 +45,124 @@ export default function MapScreen({ navigation }) {
 
 
   const dibujarPolyline = () => {
+    //console.log(viaje.ruta.ida)
     if (isSwitchOn) {
-      setRuta(viaje.ida)
+      setRuta(viaje.ruta.ida)
       setLabelAppBar('Viaje de Ida')
-      var cord = viaje.ida.route.map((e) => {
+      var cord = viaje.ruta.ida.route.map((e) => {
         return { latitude: e.lat, longitude: e.lng }
       })
     }
     else {
-      setRuta(viaje.vuelta)
+      setRuta(viaje.ruta.vuelta)
       setLabelAppBar('Viaje de Vuelta')
-      var cord = viaje.vuelta.route.map((e) => {
+      var cord = viaje.ruta.vuelta.route.map((e) => {
         return { latitude: e.lat, longitude: e.lng }
       })
     }
     setPolyline(cord)
   }
 
-  const saveLocation = (loc) => {
+  const saveLocation = async (loc) => {
     //console.log(new Date());
     /* console.log( new Date(viaje.ida.origin.time));
      console.log( new Date(viaje.vuelta.destination.time));*/
-    if (new Date() >= new Date(viaje.ida.origin.time) && new Date() <= new Date(viaje.vuelta.destination.time)) {
-      console.log('se actuaiza')
+    //if (new Date() >= new Date(viaje.ruta.ida.origin.time) && new Date() <= new Date(viaje.ruta.vuelta.destination.time)) {
+    if (viaje) {
+      /*console.log('----------------------')
+      console.log(loc.latitude.toFixed(3))
+      console.log(viaje.ruta.ida.origin.location.lat.toFixed(3))
+      console.log('----------------------')
+      console.log(loc.longitude.toFixed(3))
+      console.log(viaje.ruta.ida.origin.location.lng.toFixed(3))*/
+
+      //console.log(new Date(viaje.ruta.ida.origin.time.setMinutes(viaje.ruta.ida.origin.time.getMinutes() + 5)).toISOString())
+      /*console.log(new Date(new Date(viaje.ruta.ida.origin.time)
+        .setMinutes(new Date(viaje.ruta.ida.origin.time)
+          .getMinutes() + 15)))*/
+      //console.log(new Date().getHours() + ':' + new Date().getMinutes())
+      //console.log(viaje.ruta.ida.waypoints)
+
+      //ida
+      //console.log(viaje.ruta.ida.origin.marked)
+      if (!viaje.ruta.ida.origin.marked
+        && loc.latitude.toFixed(3) === viaje.ruta.ida.origin.location.lat.toFixed(3)
+        && loc.longitude.toFixed(3) === viaje.ruta.ida.origin.location.lng.toFixed(3)
+        && new Date() > new Date(new Date(viaje.ruta.ida.origin.time)
+          .setMinutes(new Date(viaje.ruta.ida.origin.time)
+            .getMinutes() - 5))
+        && new Date() < new Date(new Date(viaje.ruta.ida.origin.time)
+          .setMinutes(new Date(viaje.ruta.ida.origin.time)
+            .getMinutes() + 5))
+
+      ) {
+        viaje.ruta.ida.origin.marked = new Date(loc.timestamp)
+        //console.log(viaje.ruta.ida.origin.marked)
+        await axios.put(urlApi + urlViaje+'/'+viaje.id, viaje)
+        .then((re) => {
+          //console.log('ida origen actualizado');
+        }).catch((e) => { console.log(e) })
+      }
+
+
+      //console.log(viaje.ruta.ida.waypoints)
+      viaje.ruta.ida.waypoints = viaje.ruta.ida.waypoints.map(e => {
+        if (!e.marked
+          && loc.latitude.toFixed(3) === e.waypoint.location.lat.toFixed(3)
+          && loc.longitude.toFixed(3) === e.waypoint.location.lng.toFixed(3)
+          && new Date() > new Date(new Date(e.time)
+            .setMinutes(new Date(e.time)
+              .getMinutes() - 10))
+          && new Date() < new Date(new Date(e.time)
+            .setMinutes(new Date(e.time)
+              .getMinutes() + 10))
+          && e.waypoint.stopover === true
+        ) {
+          e.marked = new Date(loc.timestamp)
+          //console.log('se guarda ida way')
+          return e
+        }
+        return e
+      })
+      //console.log(viaje.ruta.ida.waypoints)
+
+      if (!viaje.ruta.ida.destination.marked
+        && loc.latitude.toFixed(3) === viaje.ruta.ida.destination.location.lat.toFixed(3)
+        && loc.longitude.toFixed(3) === viaje.ruta.ida.destination.location.lng.toFixed(3)
+        && new Date() > new Date(new Date(viaje.ruta.ida.destination.time)
+          .setMinutes(new Date(viaje.ruta.ida.destination.time)
+            .getMinutes() - 10))
+        && new Date() < new Date(new Date(viaje.ruta.ida.destination.time)
+          .setMinutes(new Date(viaje.ruta.ida.destination.time)
+            .getMinutes() + 10))
+      ) {
+        viaje.ruta.ida.destination.marked = new Date(loc.timestamp)
+        //console.log('se guarda ida llegada')
+
+      }
+      //vuelta
+
+
+      /*console.log('----------------------')
+      console.log(loc.latitude)
+      console.log(viaje.ruta.ida.origin.location.lat)
+      console.log('----------------------')
+      console.log(loc.longitude)
+      console.log(viaje.ruta.ida.origin.location.lng)*/
+
+      //console.log(new Date(loc.timestamp))
+
       var data = {
         internoId: viaje.internoId,
         location: loc
       }
       socket.emit("location", data)
-      axios.post(urlApi + urlGps, data)
+      await axios.post(urlApi + urlGps, data)
         .then((re) => {
           //console.log('se esta actualizando');
         }).catch((e) => { console.log(e) })
     }
+    //}
   };
 
   const hideDialog = () => setVisible(false);
@@ -107,7 +192,7 @@ export default function MapScreen({ navigation }) {
           opacity: 1,
           elevation: 0,
           zIndex: 5,
-          backgroundColor: "#121212CF",
+          backgroundColor: "#272727",
           //shadowOpacity: 0.5,
           //shadowRadius:5,
           borderRadius: 100,
@@ -223,7 +308,7 @@ export default function MapScreen({ navigation }) {
                 description="Inicio"
                 left={props => <List.Icon {...props} icon="map-marker-circle" color='#ff210d' />}
 
-              />
+              /> 
               {ruta.waypoints.map(marker => (
                 (marker.waypoint.stopover === true) ?
                   <List.Item

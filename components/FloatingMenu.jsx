@@ -3,18 +3,20 @@ import React from 'react'
 import { FAB } from 'react-native-paper'
 import { SesionContext } from '../providers/SesionProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ViajeContext } from '../providers/ViajeProvider';
 
 export default function FloatinMenu({ navigation }) {
 
     const [expandedMenu, setExpandedMenu] = React.useState(false);
     const { setSesion, sesion } = React.useContext(SesionContext)
     const handlePressMenu = () => setExpandedMenu(!expandedMenu);
+    const { viaje, setViaje } = React.useContext(ViajeContext)
 
  
     return (
         <FAB.Group
             fabStyle={{
-                backgroundColor: '#121212CF',
+                backgroundColor: '#272727',
                 marginBottom: 30, 
 
             }}
@@ -28,6 +30,7 @@ export default function FloatinMenu({ navigation }) {
                     onPress: () => {
                         AsyncStorage.removeItem('sesion')
                         setSesion(null)
+                        setViaje(null)
                         navigation.push('login')
                     },
                 },
@@ -39,7 +42,9 @@ export default function FloatinMenu({ navigation }) {
                 {
                     icon: 'routes',
                     label: 'Cambiar Viaje',
-                    onPress: () => navigation.push('viaje'),
+                    onPress: () => {
+                        setViaje(null)
+                        navigation.push('viaje')},
                 },
 
             ]}
